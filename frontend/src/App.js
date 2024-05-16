@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { createTicket } from './services/ticketService';
 import { Container, Typography, Button, Modal, TextField, Box } from '@material-ui/core';
 import TicketList from './components/TicketList';
-import axios from 'axios';
 
 const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

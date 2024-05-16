@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getTickets } from '../services/ticketService';
+import { getTickets,updateTicket } from '../services/ticketService';
 import TicketCard from './TicketCard';
+import KanbanBoard from './KanbanBoard';
 import { MenuItem, Select, Container } from '@material-ui/core';
 
 const TicketList = ({ refreshTrigger, triggerRefresh }) => {
@@ -21,13 +22,18 @@ const TicketList = ({ refreshTrigger, triggerRefresh }) => {
     fetchTickets();
   }, [status, sortBy, refreshTrigger]);
 
-  const handleUpdate = (updatedTicket) => {
-    setTickets((prevTickets) =>
-      prevTickets.map((ticket) =>
-        ticket.id === updatedTicket.id ? updatedTicket : ticket
-      )
-    );
-     triggerRefresh();
+  const handleUpdate = async (updatedTicket) => {
+    try {
+      await updateTicket(updatedTicket.id, updatedTicket);
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket.id === updatedTicket.id ? updatedTicket : ticket
+        )
+      );
+      triggerRefresh();
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+    }
   };
 
   return (
@@ -54,11 +60,7 @@ const TicketList = ({ refreshTrigger, triggerRefresh }) => {
           <MenuItem value="createdAt">Creation Date</MenuItem>
         </Select>
       </div>
-      <div>
-        {tickets.map(ticket => (
-          <TicketCard key={ticket.id} ticket={ticket} onUpdate={handleUpdate} />
-        ))}
-      </div>
+      <KanbanBoard tickets={tickets} onUpdate={handleUpdate} />
     </Container>
   );
 };

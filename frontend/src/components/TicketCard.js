@@ -80,9 +80,9 @@ const TicketCard = ({ ticket, onUpdate }) => {
         ) : (
           <>
             <Typography variant="h5">{ticket.title}</Typography>
-            <Typography>{ticket.description}</Typography>
-            <Typography>{ticket.contact}</Typography>
-            <Typography>{ticket.status}</Typography>
+            <Typography>Description :{ticket.description}</Typography>
+            <Typography>Contact :{ticket.contact}</Typography>
+            <Typography>Status :{ticket.status}</Typography>
             <Typography>Created At: {new Date(ticket.createdAt).toLocaleString()}</Typography>
             <Typography>Last Updated: {new Date(ticket.updatedAt).toLocaleString()}</Typography>
             <Button onClick={handleEditToggle} color="primary">Edit</Button>
