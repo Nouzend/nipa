@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getTickets,updateTicket } from '../services/ticketService';
-import TicketCard from './TicketCard';
+// import TicketCard from './TicketCard';
 import KanbanBoard from './KanbanBoard';
 import { MenuItem, Select, Container } from '@material-ui/core';
 

@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
+import { TextField, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
 import { updateTicket } from '../services/ticketService';
-import axios from 'axios';
+import { EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import { Card } from 'antd';
+import moment from 'moment-timezone';
+moment.tz.setDefault("Asia/Bangkok");
+const { Meta } = Card;
 
 const TicketCard = ({ ticket, onUpdate }) => {
   const [editable, setEditable] = useState(false);
@@ -26,7 +30,7 @@ const TicketCard = ({ ticket, onUpdate }) => {
 
   const handleSave = async () => {
     try {
-      const response = await updateTicket(ticket.id,formData);
+      const response = await updateTicket(ticket.id, formData);
       onUpdate(response.data);
       setEditable(false);
     } catch (error) {
@@ -34,61 +38,89 @@ const TicketCard = ({ ticket, onUpdate }) => {
     }
   };
 
+  const handleCancel = () => {
+    setFormData({
+      title: ticket.title,
+      description: ticket.description,
+      contact: ticket.contact,
+      status: ticket.status,
+    });
+    setEditable(false);
+  };
+
   return (
-    <Card>
-      <CardContent>
-        {editable ? (
-          <>
+    <Card
+      actions={[
+        editable ? (
+          <SaveOutlined key="save" onClick={handleSave} />
+        ) : (
+          <EditOutlined key="edit" onClick={handleEditToggle} />
+        ),
+        editable && <CloseOutlined key="cancel" onClick={handleCancel} />
+      ]}
+    >
+      <Meta
+        title={
+          editable ? (
             <TextField
-              label="Title"
               name="title"
+              label="Title"
               value={formData.title}
               onChange={handleChange}
               fullWidth
             />
+          ) : (
+            ticket.title
+          )
+        }
+        description={
+          editable ? (
             <TextField
-              label="Description"
               name="description"
+              label="Description"
               value={formData.description}
               onChange={handleChange}
               fullWidth
               multiline
             />
-            <TextField
-              label="Contact"
-              name="contact"
-              value={formData.contact}
+          ) : (
+            ticket.description
+          )
+        }
+      />
+      {editable ? (
+        <>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              name="status"
+              value={formData.status}
               onChange={handleChange}
               fullWidth
-            />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="accepted">Accepted</MenuItem>
-                <MenuItem value="resolved">Resolved</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
-              </Select>
-            </FormControl>
-            <Button onClick={handleSave} color="primary" variant="contained">Save</Button>
-            <Button onClick={handleEditToggle} color="secondary">Cancel</Button>
-          </>
-        ) : (
-          <>
-            <Typography variant="h5">{ticket.title}</Typography>
-            <Typography>Description :{ticket.description}</Typography>
-            <Typography>Contact :{ticket.contact}</Typography>
-            <Typography>Status :{ticket.status}</Typography>
-            <Typography>Created At: {new Date(ticket.createdAt).toLocaleString()}</Typography>
-            <Typography>Last Updated: {new Date(ticket.updatedAt).toLocaleString()}</Typography>
-            <Button onClick={handleEditToggle} color="primary">Edit</Button>
-          </>
-        )}
-      </CardContent>
+            >
+          <MenuItem value="pending">Pending</MenuItem>
+          <MenuItem value="accepted">Accepted</MenuItem>
+          <MenuItem value="resolved">Resolved</MenuItem>
+          <MenuItem value="rejected">Rejected</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            name="contact"
+            label="Contact"
+            value={formData.contact}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+        </>
+      ) : (
+        <>
+          <p>Status: {ticket.status}</p>
+          <p>Contact: {ticket.contact}</p>
+        </>
+      )}
+      <p>Created at: {moment(ticket.createdAt).format('DD MMMM YYYY, hh A')}</p>
+      <p>Last Updated: {moment(ticket.updatedAt).fromNow()}</p>
     </Card>
   );
 };
