@@ -1,20 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { getTickets } from '../services/ticketService';
 import TicketCard from './TicketCard';
-import { MenuItem, Select, Container} from '@material-ui/core';
+import { MenuItem, Select, Container } from '@material-ui/core';
 
-const TicketList = () => {
+const TicketList = ({ refreshTrigger, triggerRefresh }) => {
   const [tickets, setTickets] = useState([]);
   const [status, setStatus] = useState('');
   const [sortBy, setSortBy] = useState('updatedAt');
 
-  useEffect(() => {
-    const fetchTickets = async () => {
+  const fetchTickets = async () => {
+    try {
       const response = await getTickets(status, sortBy);
       setTickets(response.data);
-    };
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchTickets();
-  }, [status, sortBy]);
+  }, [status, sortBy, refreshTrigger]);
+
+  const handleUpdate = (updatedTicket) => {
+    setTickets((prevTickets) =>
+      prevTickets.map((ticket) =>
+        ticket.id === updatedTicket.id ? updatedTicket : ticket
+      )
+    );
+     triggerRefresh();
+  };
 
   return (
     <Container>
@@ -42,7 +56,7 @@ const TicketList = () => {
       </div>
       <div>
         {tickets.map(ticket => (
-          <TicketCard key={ticket.id} ticket={ticket} />
+          <TicketCard key={ticket.id} ticket={ticket} onUpdate={handleUpdate} />
         ))}
       </div>
     </Container>

@@ -27,21 +27,34 @@ exports.updateTicket = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, contact, status } = req.body;
+    const validStatuses = ['pending', 'accepted', 'resolved', 'rejected'];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+
     const updatedAt = new Date();
     const ticketRef = db.collection('tickets').doc(id);
-    const ticket = {
+
+    await ticketRef.update({
       title,
       description,
       contact,
       status,
-      updatedAt
-    };
-    await ticketRef.update(ticket);
-    res.status(200).json({ id, title, description, contact, status, updatedAt });
+      updatedAt,
+    });
+
+    const updatedTicket = (await ticketRef.get()).data();
+    updatedTicket.createdAt = updatedTicket.createdAt.toDate();
+    updatedTicket.updatedAt = updatedTicket.updatedAt.toDate();
+
+    res.status(200).json(updatedTicket);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 exports.getTickets = async (req, res) => {
   try {
@@ -58,18 +71,44 @@ exports.getTickets = async (req, res) => {
       ticketsRef = ticketsRef.orderBy('updatedAt', 'desc');
     }
 
-    const ticketsSnapshot = await db.collection('tickets').get();
+    const ticketsSnapshot = await ticketsRef.get();
     const tickets = ticketsSnapshot.docs.map(doc => {
       const data = doc.data();
-      data.createdAt = data.createdAt.toDate();
-      data.updatedAt = data.updatedAt.toDate();
+      if (data.createdAt) {
+        data.createdAt = data.createdAt.toDate();
+      }
+      if (data.updatedAt) {
+        data.updatedAt = data.updatedAt.toDate();
+      }
       return data;
     });
+
+    // Define the custom order for status
+    const statusOrder = {
+      pending: 1,
+      accepted: 2,
+      resolved: 3,
+      rejected: 4,
+    };
+
+    // Sort tickets based on the custom status order
+    tickets.sort((a, b) => {
+      if (statusOrder[a.status] < statusOrder[b.status]) {
+        return -1;
+      }
+      if (statusOrder[a.status] > statusOrder[b.status]) {
+        return 1;
+      }
+      return 0;
+    });
+
     res.status(200).json(tickets);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 exports.getTicketById = async (req, res) => {
   try {
