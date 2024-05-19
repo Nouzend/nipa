@@ -5,6 +5,11 @@ const { createTicket } = require('../models/ticket');
 exports.createTicket = async (req, res) => {
   try {
     const { title, description, contact } = req.body;
+
+    if(title =="" || description =="" || contact =="" ){
+      return res.status(400).json({ message: 'Invalid data' });
+    }
+
     const createdAt = admin.firestore.FieldValue.serverTimestamp();
     const ticketRef = db.collection('tickets').doc();
     const ticket = {
@@ -28,6 +33,10 @@ exports.updateTicket = async (req, res) => {
     const { id } = req.params;
     const { title, description, contact, status } = req.body;
     const validStatuses = ['pending', 'accepted', 'resolved', 'rejected'];
+    
+    if(title =="" || description =="" || contact =="" ){
+      return res.status(400).json({ message: 'Invalid data' });
+    }
 
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid status value' });

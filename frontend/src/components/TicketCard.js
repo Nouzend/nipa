@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { TextField, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
 import { updateTicket } from '../services/ticketService';
 import { EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
-import { Card } from 'antd';
+import { Card, Alert } from 'antd';
 import moment from 'moment-timezone';
 moment.tz.setDefault("Asia/Bangkok");
 const { Meta } = Card;
 
 const TicketCard = ({ ticket, onUpdate }) => {
+  const [alert , setAlert] = useState(false)
   const [editable, setEditable] = useState(false);
   const [formData, setFormData] = useState({
     title: ticket.title,
@@ -29,9 +30,15 @@ const TicketCard = ({ ticket, onUpdate }) => {
   };
 
   const handleSave = async () => {
+    const { title, description, contact } = formData;
+    if (!title || !description || !contact) {
+      setAlert(true)
+      return;
+    }
     try {
       const response = await updateTicket(ticket.id, formData);
       onUpdate(response.data);
+      setAlert(false)
       setEditable(false);
     } catch (error) {
       console.error('Error updating ticket:', error);
@@ -45,6 +52,7 @@ const TicketCard = ({ ticket, onUpdate }) => {
       contact: ticket.contact,
       status: ticket.status,
     });
+    setAlert(false)
     setEditable(false);
   };
 
@@ -121,6 +129,15 @@ const TicketCard = ({ ticket, onUpdate }) => {
       )}
       <p>Created at: {moment(ticket.createdAt).format('DD MMMM YYYY, hh A')}</p>
       <p>Last Updated: {moment(ticket.updatedAt).fromNow()}</p>
+      { alert ? 
+        <Alert
+        message="Error"
+        description="All fields are required."
+        type="error"
+        showIcon
+        />
+        : ""
+      }
     </Card>
   );
 };
