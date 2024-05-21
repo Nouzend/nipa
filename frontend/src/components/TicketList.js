@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { getTickets,updateTicket } from '../services/ticketService';
+import React, { useEffect, useState, useCallback } from 'react';
+import { getTickets, updateTicket } from '../services/ticketService';
 // import TicketCard from './TicketCard';
 import KanbanBoard from './KanbanBoard';
 import { MenuItem, Select, Container } from '@material-ui/core';
@@ -9,18 +9,21 @@ const TicketList = ({ refreshTrigger, triggerRefresh }) => {
   const [status, setStatus] = useState('');
   const [sortBy, setSortBy] = useState('updatedAt');
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       const response = await getTickets(status, sortBy);
       setTickets(response.data);
     } catch (error) {
       console.error('Error fetching tickets:', error);
     }
-  };
+  }, [status, sortBy]); 
 
   useEffect(() => {
-    fetchTickets();
-  }, [status, sortBy, refreshTrigger]);
+    const fetchData = async () => {
+      await fetchTickets();
+    };
+    fetchData();
+  }, [fetchTickets]); 
 
   const handleUpdate = async (updatedTicket) => {
     try {
