@@ -10,10 +10,11 @@ const App = () => {
   };
   return (
     <Container>
-      <Typography variant="h4">Helpdesk Support Ticket Management</Typography>
+      <Typography variant="h4">Helpdesk Support Ticket </Typography>
       <CreateButton     
          triggerRefresh={triggerRefresh}
       />
+      <Typography variant="h5">Manage Ticket </Typography>
       <TicketList
         refreshTrigger={refreshTrigger}
         triggerRefresh={triggerRefresh}
