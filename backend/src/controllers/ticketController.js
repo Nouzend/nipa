@@ -92,7 +92,7 @@ exports.getTickets = async (req, res) => {
       return data;
     });
 
-    // Define the custom order for status
+
     const statusOrder = {
       pending: 1,
       accepted: 2,
@@ -100,7 +100,6 @@ exports.getTickets = async (req, res) => {
       rejected: 4,
     };
 
-    // Sort tickets based on the custom status order
     tickets.sort((a, b) => {
       if (statusOrder[a.status] < statusOrder[b.status]) {
         return -1;
